@@ -1,0 +1,36 @@
+# scripts/export_clip_onnx.py
+import torch
+import sys
+from transformers import CLIPModel
+
+def export_clip_vision_to_onnx(model_name, output_path):
+    print(f"Loading model: {model_name}")
+    model = CLIPModel.from_pretrained(model_name)
+    vision_model = model.vision_model
+    vision_model.eval()
+
+    dummy_input = torch.randn(1, 3, 224, 224)
+
+    print(f"Exporting to ONNX: {output_path}")
+    torch.onnx.export(
+        vision_model,
+        dummy_input,
+        output_path,
+        input_names=["pixel_values"],
+        output_names=["image_embeds"],
+        dynamic_axes={
+            "pixel_values": {0: "batch"},
+            "image_embeds": {0: "batch"}
+        },
+        opset_version=13
+    )
+    print("Exported successfully.")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python scripts/export_clip_onnx.py <model_name> <output_path>")
+        sys.exit(1)
+
+    model_name = sys.argv[1]
+    output_path = sys.argv[2]
+    export_clip_vision_to_onnx(model_name, output_path)

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - backend
+
+  triton:
+    build:
+      context: .
+      dockerfile: Dockerfiles/triton.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/models        # Mount your model repo here
+    networks:
+      - backend
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfiles/app.Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - triton
+    env_file:
+      - .env
+    networks:
+      - backend
+    restart: unless-stopped
+
+networks:
+  backend:
+    driver: bridge

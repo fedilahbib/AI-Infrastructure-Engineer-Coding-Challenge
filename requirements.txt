@@ -1,0 +1,8 @@
+fastapi
+pymongo
+faiss-cpu
+httpx
+uvicorn
+python-dotenv
+python-multipart
+Pillow
